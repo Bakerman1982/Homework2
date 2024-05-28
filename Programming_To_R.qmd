@@ -1,0 +1,281 @@
+---
+title: "Programming R Base"
+format: html
+editor: visual
+author: "Brock Akerman"
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Task 1 - Basic Vector Practice
+
+<div>
+
+1.  Create two vectors. One vector corresponding to the pre measurements and one to the post measurements.
+
+```{r}
+#Create vectors with given values
+pre_meas <- c(130, 128, 116, 124, 133, 134, 118, 126, 114, 127, 141, 138, 128, 140, 137, 131, 120, 128, 139, 135)
+post_meas <- c(114, 98, 113, 99, 107, 116, 113, 111, 119, 117, 101, 119, 130, 122, 106, 106, 124, 102, 117, 113)
+```
+
+2.  Assign names to the vector elements using the paste() function.
+
+```{r}
+#Create the names vector with formatting found inside paste function.  Assign them to both variable vectors and then bind the rows to the names so that they are matched. 
+names <- paste("Subject", 1:20, sep = "_")
+names(pre_meas) <- names
+names(post_meas) <- names
+rbind(pre_meas, post_meas)
+```
+
+3.  Calculate the change in blood pressure for each patient by subtracting post-treatment measurements from pre-treatment measurements.
+
+```{r}
+#Calculate the change (delta) in post- to pre- measurment blood pressures
+subject_delta_task1 <- pre_meas - post_meas
+subject_delta_task1
+```
+
+4.  Calculate the average decrease in blood pressure across all patients.
+
+```{r}
+#mean function on the change in blood pressures for all observations
+mean(subject_delta_task1)
+```
+
+5.  Determine which patients experienced a decrease in blood pressure after treatment (a positive change).
+
+```{r}
+#list the names values of the subjects that had a reduce blood pressure measurement after treatment. 
+names(subject_delta_task1[(subject_delta_task1 < 0) == TRUE])
+```
+
+6.  Subset the vector of differences to only return those that have a positive change.
+
+```{r}
+subject_delta_task1[c(9,13,17)]
+```
+
+7.  Calculate the average decrease in blood pressure for those where the blood pressure decreased (positive change).
+
+```{r}
+#Wrap mean function around subset vector. 
+mean(subject_delta_task1[c(9,13,17)])
+```
+
+</div>
+
+## Task 2 - Basic Data Frame practice
+
+<div>
+
+1.  Create a data frame object with four columns corresponding to your data above: patient, pre_bp, post_bp, and diff_bp.
+
+```{r}
+#Create the data frame
+df_BP_Task2 <- data.frame("names" = names[1:20],
+                          "pre_bp" = pre_meas,
+                          "post_bp" = post_meas,
+                          "diff_bp" = subject_delta_task1)
+```
+
+2.  Return only rows where the diff_bp column is negative.
+
+```{r, echo=T, results='show'}
+#See only the differences resulting in negative values
+df_BP_Task2[(df_BP_Task2$diff_bp < 0),]
+```
+
+3.  Add a new column to the data frame corresponding to TRUE if the post_bp is less than 120.
+
+```{r}
+#Create a dummy vector called Boolean_120 with blank values. 
+Boolean_120 <- rep("", times = length(seq_along(subject_delta_task1)))
+
+#Add dummy vector to the data frame
+df_BP_Task2 <- cbind(df_BP_Task2, Boolean_120)
+
+#Replace blank values 
+df_BP_Task2$Boolean_120[df_BP_Task2$post_bp < 120] <- "TRUE"
+```
+
+4.  Finally, print the data frame out nicely in your final document by modifying the code below appropriately.
+
+```{r}
+knitr::kable(df_BP_Task2)
+```
+
+</div>
+
+## Task 3 - List practice
+
+<div>
+
+1.  Create a new data frame with this data in it that is similar to the data frame from task 2 (including the new column).
+
+```{r, results="show"}
+#Assign values to vectors
+pre_bp_3 <- c(138, 135, 147, 117, 152, 134, 114, 121, 131, 130)
+post_bp_3 <- c(105, 136, 123, 130, 134, 143, 135, 139, 120, 124)
+
+#Create a vector of values of the differences between blood pressures
+subject_delta_task3 <- pre_bp_3 - post_bp_3
+
+#Create a vector of empty values as a placeholder for the T/F column
+Boolean_120_3 <- rep("-", times = length(seq_along(subject_delta_task3)))
+
+#Create the dataframe and fill with column vectors desired include dummy boolean vector. 
+df_BP_Task3 <- data.frame("names" = names[1:10],
+                          "pre_bp" = pre_bp_3,
+                          "post_bp" = post_bp_3,
+                          "diff_bp" = subject_delta_task3,
+                          Boolean_120_3)
+
+#Logic which looks at post_bp column and replaces "TRUE" for values <120 in the Boolean_120_3 vector in the dataframe
+df_BP_Task3$Boolean_120_3 <- df_BP_Task3$Boolean_120_3[df_BP_Task3$post_bp_3 < 120] <- "TRUE"
+df_BP_Task3
+```
+
+
+
+
+2.  Now create and store a list with two elements:
+    -   1st element named treatment and contains the first data frame you created.
+    -   2nd element named placebo and contains the second data frame you created.
+
+```{r, results='hide'}
+# Create a list with both dataframes from task #2 and #3 as a subset.
+Task3list <- list("treatment" = df_BP_Task2, "placebo" = df_BP_Task3); Task3list;
+```
+
+3.  Access the first list element using three different types of syntax.
+
+```{r, results='show'}
+# Using single brackets
+Task3list[1]
+
+# Using double brackets
+Task3list[[1]][]
+
+# Using "$"
+Task3list$treatment
+```
+
+4.  In one line, access the placebo data frame, pre_bp column
+
+```{r}
+Task3list$placebo$pre_bp
+```
+
+</div>
+
+## Task 4 - Control Flow Practice
+
+<div>
+
+1.  Create a new column in each data frame from above called status.
+
+```{r, results='hide'}
+#Create dummy columns with appropriate length for the data frame assignment
+status10 <- rep("", length(Task3list$placebo[,1]))
+status20 <- rep("", length(Task3list$treatment[,1]))
+#Add new columns to each of the dataframes from Tasks 2 and 3. 
+Task3list$treatment <- data.frame(Task3list$treatment, "status" = status20)
+Task3list$placebo <- cbind(Task3list$placebo, "status" = status10)
+```
+
+2.  For the non-placebo data frame (within the list), create a for loop and use if/then/else logic to create the status column’s values.
+
+```{r}
+#For loops that assigns single-word status descriptions to different levels of blood pressure observation. 
+for (i in 1:20) {
+  if (Task3list$treatment$post_bp[i] <= 120) {
+    Task3list$treatment$status[i] <- "optimal"
+  } else if (Task3list$treatment$post_bp[i] > 120 && Task3list$treatment$post_bp[i] <= 130) {
+    Task3list$treatment$status[i] <- "borderline"
+  } else {
+    Task3list$treatment$status[i] <- "high"
+  }
+}; Task3list$treatment;
+```
+
+3.  Repeat for the placebo data frame (within the list).
+
+```{r}
+#For loops that assigns single-word status descriptions to different levels of blood pressure observation. 
+for (i in 1:10) {
+  if (Task3list$placebo$post_bp[i] <= 120) {
+    Task3list$placebo$status[i] <- "optimal"
+  } else if (Task3list$placebo$post_bp[i] > 120 && Task3list$placebo$post_bp[i] <= 130) {
+    Task3list$placebo$status[i] <- "borderline"
+  } else {
+    Task3list$placebo$status[i] <- "high"
+  }
+}; Task3list$placebo;
+```
+
+</div>
+
+## Task 5 - Function Writing
+
+<div>
+
+1.  Write a function that
+    -   Takes in a list with two data frames in it (a treatment and a placebo data frame) as an argument. Give no default value.
+    -   Takes in an R function (that would find a summary of a numeric column) with the default value being set to "mean" (notice this is a quoted string).
+    -   Finds the statistic of interest (as defined by the user input) for the pre, post, and diff columns of both data frames.– Use my_fun \<- get(stat) within the function to get the function from the quoted string.
+    -   These six values should then be returned as a named list with meaningful names- this is a somewhat challenging part!– I’m going to let you consider what to do but you might create a vector of names that is created dynamically based on the statistic passed, create a vector with the actual statistic values, and then assign names() to your vector. Then return that (an atomic vector with names can be returned instead of a list).
+    -   Finally, apply your function to you list of data frames from previous. Use it without specifying your statistic, with specifying your statistic as "var", "sd", "min", and "max".
+
+</div>
+
+```{r, eval=F}
+calc_stat <- function(Task3list, stat = mean) {
+  # Initialize a blank list for storing our stat output
+  output_list <- list()
+  
+  # Fetch argument and assign it to easier-to-use var for use in the for loop
+  summfunc <- stat
+  
+  # Define global function variables for
+  name_df <- c("treatment", "placebo")
+  name_col <- c("pre_bp", "post_bp", "diff_bp")
+  
+  # The outside portion of the for loop that iterates over data frames
+  for (i in name_df) {
+    current_df <- Task3list[[i]]  # first dataframe iteration
+    df_result[i] <- list()  # save as list to this var
+  }
+    # The nested inside portion of the for loop that iterates over column names    
+    for (j in name_col) {
+      df_result[j] <- summfunc(current_df[j], na.rm = TRUE)  # runs stat arg against column, saves to var
+      output_list[[name_df, name_col]] <- paste(name_df, name_col , formals(calc_stat)[[2]]:, df_result[j], sep = " ") #result of stat on col saves to output list as string
+    }
+    # Store the result in the output list
+  }
+  
+  # Display output_list
+  return(output_list)
+}
+
+## Not evaluated because I could not get the for loop to run.  
+```
+
+**Vector Tracking**\
+
+**First Dataframe: TREATMENT**\
+pre_meas/post_meas	(DATA)\
+df_BP_Task2 		(DATAFRAME)\
+subject_delta_task1 	(DELTA PRE-POST)\
+Boolean_120 		(TRUE/FALSE COLUMN)\
+
+**Second Dataframe: PLACEBO**\
+pre_bp_3/post_bp_3	(DATA)\
+df_BP_Task3 		(DATAFRAME)\
+subject_delta_task3	(DELTA PRE-POST)\
+Boolean_120_3 		(TRUE/FALSE COLUMN)\
+
+**Combination:  **\
+Task3list		(LISTS CONTAINING ALL DF)\
+
